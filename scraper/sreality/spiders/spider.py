@@ -101,25 +101,25 @@ class SrealitySpider(scrapy.Spider):
 
         yield self.create_next_request()
 
-    @staticmethod
-    def parse_extract_title(property):
+    def parse_extract_title(self, property):
         # returns title of the property
         title = property.xpath(r'.//h2//*[string-length(normalize-space(text())) > 0]/text()').getall()
 
         if len(title) == 0:
-            raise scrapy.exceptions.CloseSpider("Title is not found")
+            self.logger.error("Title not found")
+            exit(1)
         elif len(title) > 1:
-            raise scrapy.exceptions.CloseSpider("Found multiple titles")
-
+            self.logger.error("Found more than one title")
+            exit(1)
         return title[0].strip()
 
-    @staticmethod
-    def parse_extract_first_image(property):
+    def parse_extract_first_image(self, property):
         # returns first image
         # the a/img removes "camera.svg"
         image_urls = property.xpath(r'.//a/img/@src').getall()
 
         if len(image_urls) == 0:
-            raise scrapy.exceptions.CloseSpider("No image found")
+            self.logger.error("Image not found")
+            exit(1)
 
         return image_urls[0]

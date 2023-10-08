@@ -29,6 +29,12 @@ services:
       context: .
       dockerfile: scraper/scraper.dockerfile
 
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 5
+
     depends_on:
       scraper_splash:
         condition: service_started
@@ -53,6 +59,8 @@ services:
     build:
       context: .
       dockerfile: webserver/webserver.dockerfile
+
+    restart: always
 
     ports:
       - 8080:8080
