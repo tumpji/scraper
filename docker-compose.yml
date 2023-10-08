@@ -1,0 +1,66 @@
+version: "3.8"
+services:
+
+  # ------------------------
+  # PostgresSQL database
+  
+  database:
+    image: postgres:16-bookworm
+
+    environment:
+      # creates default user "postgres" with password "password"
+      POSTGRES_PASSWORD: password
+
+    ports:
+      - 5432:5432
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ------------------------
+  # Scraper
+
+  # Scrapes website using scraper & splash and saves relevant information to the database. 
+  scraper:
+    build: 
+      context: .
+      dockerfile: scraper/scraper.dockerfile
+
+    depends_on:
+      scraper_splash:
+        condition: service_started
+      database: 
+        condition: service_healthy
+        restart: true
+
+    links:
+      - database
+
+  # Javascript rendering service
+  scraper_splash:
+    image: scrapinghub/splash
+
+    ports:
+      - 8050:8050
+
+  # ------------------------
+  # Simple web server
+  
+  webserver:
+    build:
+      context: .
+      dockerfile: webserver/webserver.dockerfile
+
+    ports:
+      - 8080:8080
+
+    depends_on:
+      database: 
+        condition: service_healthy
+        restart: true
+      scraper:
+        condition: service_completed_successfully
+        restart: true

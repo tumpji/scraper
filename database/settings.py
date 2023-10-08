@@ -1,0 +1,6 @@
+
+POSTGRES_HOST = "database"
+POSTGRES_PORT = "5432"
+POSTGRES_DATABASE = "postgres"
+POSTGRES_USER = "postgres"
+POSTGRES_PASSWORD = "password"
